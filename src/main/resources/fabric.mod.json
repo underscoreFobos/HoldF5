@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "holdf5",
+  "version": "${version}",
+  "name": "HoldF5",
+  "description": "MCTiers-approved freelook/perspective alternative. Hold a key to temporarily switch to third person view, releases back to first person. Features smooth camera transition with configurable speed and optional motion blur.",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/holdf5/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-datagen": [
+      "dev.fobium.holdf5.client.Holdf5DataGenerator"
+    ],
+    "client": [
+      "dev.fobium.holdf5.client.Holdf5Client"
+    ],
+    "modmenu": [
+      "dev.fobium.holdf5.client.Holdf5ModMenuIntegration"
+    ],
+    "main": [
+      "dev.fobium.holdf5.Holdf5"
+    ]
+  },
+  "mixins": [
+    "holdf5.mixins.json",
+    {
+      "config": "holdf5.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": ">=1.21 <=1.21.11"
+  }
+}

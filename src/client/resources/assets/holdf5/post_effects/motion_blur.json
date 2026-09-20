@@ -1,0 +1,35 @@
+{
+    "targets": [
+        "swap",
+        "prev"
+    ],
+    "passes": [
+        {
+            "name": "holdf5_motion_blur",
+            "intarget": "minecraft:main",
+            "outtarget": "swap",
+            "auxtargets": [
+                {
+                    "name": "PrevSampler",
+                    "id": "prev"
+                }
+            ],
+            "uniforms": [
+                {
+                    "name": "Strength",
+                    "values": [ 0.5 ]
+                }
+            ]
+        },
+        {
+            "name": "holdf5_blit",
+            "intarget": "swap",
+            "outtarget": "prev"
+        },
+        {
+            "name": "holdf5_blit",
+            "intarget": "swap",
+            "outtarget": "minecraft:main"
+        }
+    ]
+}
