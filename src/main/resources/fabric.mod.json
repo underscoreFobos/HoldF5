@@ -4,8 +4,13 @@
   "version": "${version}",
   "name": "HoldF5",
   "description": "MCTiers-approved freelook/perspective alternative. Hold a key to temporarily switch to third person view, releases back to first person. Features smooth camera transition with configurable speed and optional motion blur.",
-  "authors": [],
-  "contact": {},
+  "authors": [
+    "_Fobos"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/hold-f5",
+    "sources": "https://github.com/underscoreFobos/HoldF5"
+  },
   "license": "All-Rights-Reserved",
   "icon": "assets/holdf5/icon.png",
   "environment": "client",

@@ -13,6 +13,12 @@ base {
 loom {
     splitEnvironmentSourceSets()
 
+    runs {
+        client {
+            runDir = project.findProperty("test_run_dir") ?: "run"
+        }
+    }
+
     mods {
         "holdf5" {
             sourceSet sourceSets.main

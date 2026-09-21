@@ -5,6 +5,7 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Requirement;
 import me.shedaniel.clothconfig2.gui.entries.BooleanListEntry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 
@@ -19,7 +20,6 @@ public final class Holdf5ConfigScreen {
                 .setSavingRunnable(config::save);
         ConfigEntryBuilder entries = builder.entryBuilder();
         ConfigCategory camera = builder.getOrCreateCategory(Text.translatable("holdf5.config.category.camera"));
-        ConfigCategory effects = builder.getOrCreateCategory(Text.translatable("holdf5.config.category.effects"));
 
         camera.addEntry(entries.startSelector(
                         Text.translatable("holdf5.config.perspective.label"),
@@ -53,41 +53,44 @@ public final class Holdf5ConfigScreen {
                 .setSaveConsumer(value -> config.releaseTransitionSpeed = percentToSpeed(value))
                 .build());
 
-        BooleanListEntry motionBlur = entries.startBooleanToggle(
-                        Text.translatable("holdf5.config.motion_blur.label"),
-                        config.motionBlur)
-                .setDefaultValue(false)
-                .setTooltip(Text.translatable("holdf5.config.motion_blur.desc"))
-                .setSaveConsumer(value -> {
-                    config.motionBlur = value;
-                    if (value) {
-                        Holdf5MotionBlur.resetAvailability();
-                    } else {
+        if (supportsVisualEffects()) {
+            ConfigCategory effects = builder.getOrCreateCategory(Text.translatable("holdf5.config.category.effects"));
+            BooleanListEntry motionBlur = entries.startBooleanToggle(
+                            Text.translatable("holdf5.config.motion_blur.label"),
+                            config.motionBlur)
+                    .setDefaultValue(false)
+                    .setTooltip(Text.translatable("holdf5.config.motion_blur.desc"))
+                    .setSaveConsumer(value -> {
+                        config.motionBlur = value;
+                        if (value) {
+                            Holdf5MotionBlur.resetAvailability();
+                        } else {
+                            Holdf5MotionBlur.cleanup();
+                        }
+                    })
+                    .build();
+            effects.addEntry(motionBlur);
+            effects.addEntry(entries.startSelector(
+                            Text.translatable("holdf5.config.motion_blur_mode.label"),
+                            MotionBlurMode.values(),
+                            MotionBlurMode.from(config.motionBlurMode))
+                    .setDefaultValue(MotionBlurMode.TRANSITION)
+                    .setTooltip(Text.translatable("holdf5.config.motion_blur_mode.desc"))
+                    .setRequirement(Requirement.isTrue(motionBlur))
+                    .setSaveConsumer(mode -> config.motionBlurMode = mode.value)
+                    .build());
+            effects.addEntry(entries.startIntSlider(
+                            Text.translatable("holdf5.config.motion_blur_strength.label"),
+                            strengthToPercent(config.motionBlurStrength), 10, 95)
+                    .setDefaultValue(50)
+                    .setTooltip(Text.translatable("holdf5.config.motion_blur_strength.desc"))
+                    .setRequirement(Requirement.isTrue(motionBlur))
+                    .setSaveConsumer(value -> {
+                        config.motionBlurStrength = percentToStrength(value);
                         Holdf5MotionBlur.cleanup();
-                    }
-                })
-                .build();
-        effects.addEntry(motionBlur);
-        effects.addEntry(entries.startSelector(
-                        Text.translatable("holdf5.config.motion_blur_mode.label"),
-                        MotionBlurMode.values(),
-                        MotionBlurMode.from(config.motionBlurMode))
-                .setDefaultValue(MotionBlurMode.TRANSITION)
-                .setTooltip(Text.translatable("holdf5.config.motion_blur_mode.desc"))
-                .setRequirement(Requirement.isTrue(motionBlur))
-                .setSaveConsumer(mode -> config.motionBlurMode = mode.value)
-                .build());
-        effects.addEntry(entries.startIntSlider(
-                        Text.translatable("holdf5.config.motion_blur_strength.label"),
-                        strengthToPercent(config.motionBlurStrength), 10, 95)
-                .setDefaultValue(50)
-                .setTooltip(Text.translatable("holdf5.config.motion_blur_strength.desc"))
-                .setRequirement(Requirement.isTrue(motionBlur))
-                .setSaveConsumer(value -> {
-                    config.motionBlurStrength = percentToStrength(value);
-                    Holdf5MotionBlur.cleanup();
-                })
-                .build());
+                    })
+                    .build());
+        }
 
         return builder.build();
     }
@@ -106,6 +109,21 @@ public final class Holdf5ConfigScreen {
 
     private static float percentToStrength(int percent) {
         return percent / 100.0f;
+    }
+
+    private static boolean supportsVisualEffects() {
+        String version = FabricLoader.getInstance().getModContainer("minecraft")
+                .map(container -> container.getMetadata().getVersion().getFriendlyString())
+                .orElse("1.21");
+        String[] parts = version.split("\\.");
+        try {
+            int major = Integer.parseInt(parts[0]);
+            int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+            int patch = parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+            return major > 1 || major == 1 && (minor > 21 || minor == 21 && patch >= 6);
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
     }
 
     private enum PerspectiveOption {

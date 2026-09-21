@@ -323,9 +323,12 @@ public class Holdf5MotionBlur {
         blurPass.addProperty("output", "minecraft:main");
 
         JsonObject uniforms = new JsonObject();
-        JsonArray strengthArr = new JsonArray();
-        strengthArr.add(strength);
-        uniforms.add("Strength", strengthArr);
+        JsonObject strengthUniform = new JsonObject();
+        strengthUniform.addProperty("type", "float");
+        strengthUniform.addProperty("value", strength);
+        JsonArray strengthUniforms = new JsonArray();
+        strengthUniforms.add(strengthUniform);
+        uniforms.add("Strength", strengthUniforms);
         blurPass.add("uniforms", uniforms);
 
         passes.add(blurPass);
